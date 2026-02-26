@@ -1,33 +1,37 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from flask import Flask, request, jsonify, send_from_directory
 import os
 
-app = FastAPI()
+app = Flask(__name__)
 
-UPLOAD_FOLDER = "uploads"
-
-# Garante que a pasta existe
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+UPLOAD_FOLDER = "pedidos"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-@app.delete("/zerar")
-def zerar_pedidos():
-    try:
-        arquivos_removidos = 0
+@app.route("/")
+def home():
+    return "API PEDIDOS GPS ONLINE 🔥"
 
-        for arquivo in os.listdir(UPLOAD_FOLDER):
-            caminho = os.path.join(UPLOAD_FOLDER, arquivo)
-            if os.path.isfile(caminho):
-                os.remove(caminho)
-                arquivos_removidos += 1
 
-        return JSONResponse(
-            content={
-                "message": "Pedidos apagados com sucesso.",
-                "arquivos_removidos": arquivos_removidos
-            }
-        )
+@app.route("/upload", methods=["POST"])
+def upload():
+    if "file" not in request.files:
+        return jsonify({"erro": "Nenhum arquivo enviado"}), 400
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    file = request.files["file"]
+    file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+    return jsonify({"mensagem": "Upload realizado com sucesso!"})
+
+
+@app.route("/pedidos", methods=["GET"])
+def listar_pedidos():
+    arquivos = os.listdir(UPLOAD_FOLDER)
+    return jsonify(arquivos)
+
+
+@app.route("/download/<nome_arquivo>", methods=["GET"])
+def baixar_pedido(nome_arquivo):
+    return send_from_directory(UPLOAD_FOLDER, nome_arquivo, as_attachment=True)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
