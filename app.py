@@ -12,7 +12,7 @@ USUARIO = "gps"
 SENHA = "1998"
 
 def verificar_auth(username, password):
-    return username == gps and password == 1998
+    return username == USUARIO and password == SENHA
 
 def autenticar():
     return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -58,5 +58,3 @@ def baixar_pedido(nome_arquivo):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
