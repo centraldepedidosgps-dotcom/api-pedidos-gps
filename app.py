@@ -8,8 +8,8 @@ UPLOAD_FOLDER = "pedidos"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # 🔐 Login fixo da API
-USUARIO = "admin"
-SENHA = "1234"
+USUARIO = "gps"
+SENHA = "1998"
 
 def verificar_auth(username, password):
     return username == USUARIO and password == SENHA
@@ -58,3 +58,4 @@ def baixar_pedido(nome_arquivo):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
