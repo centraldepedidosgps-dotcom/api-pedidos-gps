@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from functools import wraps
 import os
 
 app = Flask(__name__)
+CORS(app)  # <--- permite requisições de qualquer origem (navegador)
 
 UPLOAD_FOLDER = "pedidos"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -89,5 +91,4 @@ def baixar_pedido(nome_arquivo):
 # EXECUÇÃO
 # ==========================
 if __name__ == "__main__":
-    # Rodar na porta 5000, host 0.0.0.0 para acesso externo
     app.run(host="0.0.0.0", port=5000, debug=True)
