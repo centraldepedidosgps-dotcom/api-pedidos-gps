@@ -31,14 +31,12 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-
 # ==========================
 # ROTAS
 # ==========================
 @app.route("/")
 def home():
     return "API PEDIDOS GPS ONLINE 🔥"
-
 
 @app.route("/upload", methods=["POST"])
 @requires_auth
@@ -52,10 +50,15 @@ def upload():
         return jsonify({"erro": "Nome de arquivo inválido"}), 400
 
     caminho = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(caminho)
 
-    return jsonify({"mensagem": "Upload realizado com sucesso!"})
+    if os.path.exists(caminho):
+        return jsonify({"erro": "Arquivo já existe"}), 400
 
+    try:
+        file.save(caminho)
+        return jsonify({"mensagem": "Upload realizado com sucesso!"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
 @app.route("/pedidos", methods=["GET"])
 @requires_auth
@@ -67,22 +70,24 @@ def listar_pedidos():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-
 @app.route("/download/<nome_arquivo>", methods=["GET"])
 @requires_auth
 def baixar_pedido(nome_arquivo):
     try:
+        caminho = os.path.join(UPLOAD_FOLDER, nome_arquivo)
+        if not os.path.exists(caminho):
+            return jsonify({"erro": "Arquivo não encontrado"}), 404
         return send_from_directory(
             UPLOAD_FOLDER,
             nome_arquivo,
             as_attachment=True
         )
     except Exception as e:
-        return jsonify({"erro": str(e)}), 404
-
+        return jsonify({"erro": str(e)}), 500
 
 # ==========================
 # EXECUÇÃO
 # ==========================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    # Rodar na porta 5000, host 0.0.0.0 para acesso externo
+    app.run(host="0.0.0.0", port=5000, debug=True)
